@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    container_name: nest_postgres
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    ports:
+      - '8000:8000'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - nest_network
+
+  redis:
+    image: redis:7.0-alpine
+    container_name: nest_redis
+    environment:
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+    ports:
+      - '${REDIS_PORT}:${REDIS_PORT}'
+    networks:
+      - nest_network
+
+  nestjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nest_app
+    env_file: .env
+    environment:
+      DATABASE_HOST: postgres
+    ports:
+      - '3000:3000'
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - nest_network
+
+volumes:
+  postgres_data:
+
+networks:
+  nest_network:
