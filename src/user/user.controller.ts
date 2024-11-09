@@ -30,8 +30,9 @@ import { PaginationDto } from 'src/common/dto/pagination/pagination.dto';
 import { ApiPaginatedResponse } from 'src/common/decorators/api-paginated-response';
 import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { REDIS_CACHE_TTL } from 'src/common/enums/redis-ttl';
-import { CreateUserDto, UpdateUserDto } from './dto';
+import { CreateUserDto, UpdateUserDto, UpdateUserPasswordDto } from './dto';
 import { FindUserByIdUseCase } from './use-cases';
+import { UpdateUserPasswordUseCase } from './use-cases/update-user-password.usecase';
 
 @ApiTags('user')
 @Controller('user')
@@ -42,6 +43,7 @@ export class UserController {
     private readonly updateUserUseCase: UpdateUserUseCase,
     private readonly deleteUserUseCase: DeleteUserUseCase,
     private readonly findUserByIdUseCase: FindUserByIdUseCase,
+    private readonly updateUserPasswordUseCase: UpdateUserPasswordUseCase,
   ) {}
 
   @Post()
@@ -77,6 +79,21 @@ export class UserController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<User | undefined> {
     return await this.findUserByIdUseCase.execute(id);
+  }
+
+  @Patch('password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Update the user password' })
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'User password updated successfully.',
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found.' })
+  @ApiBody({ type: UpdateUserPasswordDto })
+  async updatePassword(
+    @Body() updateUserPasswordDto: UpdateUserPasswordDto,
+  ): Promise<void> {
+    return await this.updateUserPasswordUseCase.execute(updateUserPasswordDto);
   }
 
   @Patch(':id')

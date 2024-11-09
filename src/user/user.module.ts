@@ -12,6 +12,7 @@ import {
   FindUserByIdUseCase,
   FindUserByEmailUseCase,
 } from './use-cases';
+import { UpdateUserPasswordUseCase } from './use-cases/update-user-password.usecase';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User]), BcryptModule],
@@ -24,6 +25,7 @@ import {
     DeleteUserUseCase,
     FindUserByIdUseCase,
     FindUserByEmailUseCase,
+    UpdateUserPasswordUseCase,
   ],
   exports: [TypeOrmModule],
 })

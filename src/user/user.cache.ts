@@ -8,27 +8,39 @@ export class UserCache {
   constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache) {}
 
   async getByEmail(email: string): Promise<User | undefined> {
-    return (await this.cacheManager.get(`user_${email}`)) as User | undefined;
+    const cachedUser: User | undefined = (await this.cacheManager.get(
+      `user_${email}`,
+    )) as User | undefined;
+
+    if (cachedUser) {
+      return new User(cachedUser);
+    }
+
+    return cachedUser;
   }
 
   async setByEmail(email: string, user: User): Promise<void> {
     await this.cacheManager.set(
       `user_${email}`,
-      user.toPlain(),
+      user,
       REDIS_CACHE_TTL.ONE_MINUTE,
     );
   }
 
   async getById(id: number): Promise<User | undefined> {
-    return (await this.cacheManager.get(`user_${id}`)) as User | undefined;
+    const cachedUser: User | undefined = (await this.cacheManager.get(
+      `user_${id}`,
+    )) as User | undefined;
+
+    if (cachedUser) {
+      return new User(cachedUser);
+    }
+
+    return cachedUser;
   }
 
   async setById(id: number, user: User): Promise<void> {
-    await this.cacheManager.set(
-      `user_${id}`,
-      user.toPlain(),
-      REDIS_CACHE_TTL.ONE_MINUTE,
-    );
+    await this.cacheManager.set(`user_${id}`, user, REDIS_CACHE_TTL.ONE_MINUTE);
   }
 
   async deleteUserCache(user: User): Promise<void> {
