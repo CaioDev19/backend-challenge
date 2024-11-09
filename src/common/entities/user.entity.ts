@@ -23,10 +23,11 @@ export class User extends AbstractEntity<User> {
     maxLength: 255,
     example: 'john.doe@example.com',
   })
-  @Index({ unique: true })
+  @Index()
   @Column({
     length: 255,
     nullable: false,
+    unique: true,
   })
   @IsEmail()
   email: string;

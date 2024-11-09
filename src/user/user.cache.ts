@@ -14,7 +14,7 @@ export class UserCache {
   async setByEmail(email: string, user: User): Promise<void> {
     await this.cacheManager.set(
       `user_${email}`,
-      user,
+      user.toPlain(),
       REDIS_CACHE_TTL.ONE_MINUTE,
     );
   }
@@ -24,7 +24,11 @@ export class UserCache {
   }
 
   async setById(id: number, user: User): Promise<void> {
-    await this.cacheManager.set(`user_${id}`, user, REDIS_CACHE_TTL.ONE_MINUTE);
+    await this.cacheManager.set(
+      `user_${id}`,
+      user.toPlain(),
+      REDIS_CACHE_TTL.ONE_MINUTE,
+    );
   }
 
   async deleteUserCache(user: User): Promise<void> {
