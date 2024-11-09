@@ -5,6 +5,8 @@ import { UserModule } from './user/user.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { RedisModule } from './common/redis/redis.module';
 import { configs } from './common/config';
+import { KafkaModule } from './kafka/kafka.module';
+import { UserReportModule } from './user-report/user-report.module';
 
 @Module({
   imports: [
@@ -13,8 +15,10 @@ import { configs } from './common/config';
       load: [...configs],
     }),
     DatabaseModule,
+    KafkaModule,
     UserModule,
     RedisModule,
+    UserReportModule,
   ],
   controllers: [],
   providers: [

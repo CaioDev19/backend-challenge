@@ -1,10 +1,13 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, Inject } from '@nestjs/common';
 import { BcryptService } from 'src/common/bcrypt/bcrypt.service';
 import { User } from 'src/common/entities';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FindUserByEmailUseCase } from './find-user-by-email-usecase';
 import { CreateUserDto } from '../dto';
+import { ClientKafka } from '@nestjs/microservices';
+import { KAFKA_SERVICE_TOKEN } from 'src/common/constants';
+import { KafkaTopic } from 'src/kafka/enums';
 
 @Injectable()
 export class CreateUserUseCase {
@@ -13,6 +16,7 @@ export class CreateUserUseCase {
     private readonly userRepository: Repository<User>,
     private readonly bcryptService: BcryptService,
     private readonly findUserByEmailUseCase: FindUserByEmailUseCase,
+    @Inject(KAFKA_SERVICE_TOKEN) private readonly kafkaClient: ClientKafka,
   ) {}
 
   async execute(createUserDto: CreateUserDto): Promise<User> {
@@ -34,7 +38,11 @@ export class CreateUserUseCase {
         password: hashedPassword,
       });
 
-      return await this.userRepository.save(user);
+      const createdUser: User = await this.userRepository.save(user);
+
+      this.kafkaClient.emit(KafkaTopic.UserCreated, { userId: createdUser.id });
+
+      return createdUser;
     } catch (error: unknown) {
       throw error;
     }

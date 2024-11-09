@@ -1,9 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from 'src/common/entities';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserCache } from '../user.cache';
+import { ClientKafka } from '@nestjs/microservices';
+import { KAFKA_SERVICE_TOKEN } from 'src/common/constants';
+import { KafkaTopic } from 'src/kafka/enums';
 
 @Injectable()
 export class UpdateUserUseCase {
@@ -11,6 +14,7 @@ export class UpdateUserUseCase {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly userCache: UserCache,
+    @Inject(KAFKA_SERVICE_TOKEN) private readonly kafkaClient: ClientKafka,
   ) {}
 
   async execute(id: number, updateUserDto: UpdateUserDto): Promise<User> {
@@ -28,6 +32,7 @@ export class UpdateUserUseCase {
 
       if (updateResponse) {
         await this.userCache.setUserCache(updateResponse);
+        this.kafkaClient.emit(KafkaTopic.UserUpdated, { userId: id });
       }
 
       return updateResponse;

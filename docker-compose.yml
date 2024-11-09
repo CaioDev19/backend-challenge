@@ -39,6 +39,36 @@ services:
     networks:
       - nest_network
 
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: nest_zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - '2181:2181'
+    networks:
+      - nest_network
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: nest_kafka
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: ${KAFKA_LISTENER_SECURITY_PROTOCOL_MAP}
+      KAFKA_ADVERTISED_LISTENERS: ${KAFKA_ADVERTISED_LISTENERS}
+      KAFKA_LISTENERS: ${KAFKA_LISTENERS}
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_ZOOKEEPER_CONNECT: 'nest_zookeeper:2181'
+    ports:
+      - '9092:9092'
+    networks:
+      - nest_network
+
   nestjs:
     build:
       context: .
@@ -52,6 +82,7 @@ services:
     depends_on:
       - postgres
       - redis
+      - kafka
     networks:
       - nest_network
 
