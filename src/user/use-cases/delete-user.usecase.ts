@@ -1,24 +1,29 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { UserService } from '../user.service';
+import { Injectable } from '@nestjs/common';
 import { User } from 'src/common/entities';
-import { DeleteResult } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { FindUserByIdUseCase } from './find-user-by-id.usecase';
+import { UserCache } from '../user.cache';
 
 @Injectable()
 export class DeleteUserUseCase {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    private readonly findUserByIdUserCase: FindUserByIdUseCase,
+    private readonly userCache: UserCache,
+  ) {}
 
   async execute(id: number): Promise<void> {
     try {
-      const user: User | undefined = await this.userService.findById(id);
+      const user: User = await this.findUserByIdUserCase.execute(id);
 
-      if (!user) {
-        throw new NotFoundException(`User with ID ${id} not found`);
-      }
-
-      const deleteResult: DeleteResult = await this.userService.delete(user.id);
+      const deleteResult: DeleteResult = await this.userRepository.delete(
+        user.id,
+      );
 
       if (deleteResult.affected > 0) {
-        await this.userService.deleteUserCache(user);
+        await this.userCache.deleteUserCache(user);
       }
     } catch (error: unknown) {
       throw error;

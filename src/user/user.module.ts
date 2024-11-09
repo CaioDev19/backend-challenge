@@ -4,18 +4,26 @@ import { UserController } from './user.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/common/entities';
 import { BcryptModule } from 'src/common/bcrypt/bcrypt.module';
-import { CreateUserUseCase } from './use-cases/create-user.usecase';
-import { UpdateUserUseCase } from './use-cases/update-user.usecase';
-import { DeleteUserUseCase } from './use-cases/delete-user.usecase';
+import { UserCache } from './user.cache';
+import {
+  CreateUserUseCase,
+  UpdateUserUseCase,
+  DeleteUserUseCase,
+  FindUserByIdUseCase,
+  FindUserByEmailUseCase,
+} from './use-cases';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User]), BcryptModule],
   controllers: [UserController],
   providers: [
+    UserCache,
     UserService,
     UpdateUserUseCase,
-    DeleteUserUseCase,
     CreateUserUseCase,
+    DeleteUserUseCase,
+    FindUserByIdUseCase,
+    FindUserByEmailUseCase,
   ],
   exports: [TypeOrmModule],
 })

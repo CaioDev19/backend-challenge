@@ -13,7 +13,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { CreateUserUseCase } from './use-cases/create-user.usecase';
 import {
   ApiBody,
@@ -24,7 +23,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { User } from 'src/common/entities';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateUserUseCase } from './use-cases/update-user.usecase';
 import { DeleteUserUseCase } from './use-cases/delete-user.usecase';
 import { PaginationQueryDto } from 'src/common/dto/pagination/pagination-query.dto';
@@ -32,6 +30,8 @@ import { PaginationDto } from 'src/common/dto/pagination/pagination.dto';
 import { ApiPaginatedResponse } from 'src/common/decorators/api-paginated-response';
 import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { REDIS_CACHE_TTL } from 'src/common/enums/redis-ttl';
+import { CreateUserDto, UpdateUserDto } from './dto';
+import { FindUserByIdUseCase } from './use-cases';
 
 @ApiTags('user')
 @Controller('user')
@@ -41,6 +41,7 @@ export class UserController {
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly updateUserUseCase: UpdateUserUseCase,
     private readonly deleteUserUseCase: DeleteUserUseCase,
+    private readonly findUserByIdUseCase: FindUserByIdUseCase,
   ) {}
 
   @Post()
@@ -75,7 +76,7 @@ export class UserController {
   async findOne(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<User | undefined> {
-    return await this.userService.findById(id);
+    return await this.findUserByIdUseCase.execute(id);
   }
 
   @Patch(':id')
