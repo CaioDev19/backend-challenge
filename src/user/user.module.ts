@@ -27,6 +27,6 @@ import { UpdateUserPasswordUseCase } from './use-cases/update-user-password.usec
     FindUserByEmailUseCase,
     UpdateUserPasswordUseCase,
   ],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule, FindUserByIdUseCase],
 })
 export class UserModule {}

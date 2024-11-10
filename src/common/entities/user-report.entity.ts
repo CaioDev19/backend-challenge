@@ -1,17 +1,28 @@
-import { Column, CreateDateColumn, Entity } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+} from 'typeorm';
 import { AbstractEntity } from './abstract.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { UserReportAction } from '../enums/user-report-action';
+import { User } from './user.entity';
 
 @Entity('user-report')
 export class UserReport extends AbstractEntity<UserReport> {
   @ApiProperty({
-    description: 'The id of the user where the action happened',
+    description: 'The user where the action happened',
   })
-  @Column({
+  @Index()
+  @ManyToOne(() => User, (user) => user.reports, {
     nullable: false,
+    cascade: true,
   })
-  userId: number;
+  @JoinColumn({ name: 'userId' })
+  user: User;
 
   @ApiProperty({
     description: 'The action',
